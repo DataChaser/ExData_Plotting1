@@ -1,19 +1,36 @@
-#Setting working directory
-setwd("D:/Courses/Data_Science/John_Hopkins_Specialization/Course4-EDA")
-
-# Load the necessary library
 library(data.table)
 
-# Load only the data for the required dates
-data <- fread("household_power_consumption.txt", na.strings = "?")
-data <- data[Date == "1/2/2007" | Date == "2/2/2007"]
+#Setting working directory
+setwd("D:/Courses/Data_Science/John_Hopkins_Specialization/Course4-EDA/Module1")
 
-# Combine Date and Time columns
-data$Date <- as.Date(data$Date, format = "%d/%m/%Y")
-data$DateTime <- strptime(paste(data$Date, data$Time), format = "%Y/%m/%d %H:%M:%S")
+# Loading the files
+data <- fread("household_power_consumption.txt", sep = ";")
 
-# Plot 2
+# Convert 'Date' to Date type 
+data[, Date := as.Date(Date, format = "%d/%m/%Y")]
+
+# Filter for dates 2007-02-01 and 2007-02-02
+subset_data <- data[Date >= "2007-02-01" & Date <= "2007-02-02"]
+
+# Converting columns to numeric types
+subset_data[, Global_active_power := as.numeric(Global_active_power)]
+subset_data[, Global_reactive_power := as.numeric(Global_reactive_power)]
+subset_data[, Voltage := as.numeric(Voltage)]
+subset_data[, Global_intensity := as.numeric(Global_intensity)]
+subset_data[, Sub_metering_1 := as.numeric(Sub_metering_1)]
+subset_data[, Sub_metering_2 := as.numeric(Sub_metering_2)]
+subset_data[, Sub_metering_3 := as.numeric(Sub_metering_3)]
+
+
+# plotting Global_active_power lineGraph
 png("plot2.png", width = 480, height = 480)
-plot(data$DateTime, data$Global_active_power, type = "l",
-     xlab = "", ylab = "Global Active Power (kilowatts)")
+plot(subset_data$Global_active_power, 
+     type = "l", # 'l' for line plot
+     xlab = "",  # No label for x-axis
+     ylab = "Global Active Power (kilowatts)", 
+     xaxt = "n") # Suppress default x-axis
+
+# Add custom x-axis with three ticks for Thu, Fri, and Sat
+axis(1, at = c(1, length(subset_data$Global_active_power)/2, length(subset_data$Global_active_power)), 
+     labels = c("Thu", "Fri", "Sat"))
 dev.off()
